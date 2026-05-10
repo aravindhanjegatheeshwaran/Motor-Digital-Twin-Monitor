@@ -72,6 +72,11 @@ class SerialReader:
             self.status_message = f"Connected to {self.port} @ {self.baud_rate} baud"
             print(f"[SerialReader] {self.status_message}")
             return True
+        except PermissionError:
+            self.connected = False
+            self.status_message = f"{self.port} is in use by another application — close it and reconnect"
+            print(f"[SerialReader] {self.status_message}")
+            return False
         except Exception as exc:
             self.connected = False
             self.status_message = f"Cannot open {self.port}: {exc}"
@@ -79,13 +84,14 @@ class SerialReader:
             return False
 
     def _close_connection(self) -> None:
-        if self._serial_conn is not None:
+        conn = self._serial_conn
+        self._serial_conn = None
+        self.connected = False
+        if conn is not None:
             try:
-                if self._serial_conn.is_open:
-                    self._serial_conn.close()
+                conn.close()
             except Exception:
                 pass
-        self.connected = False
 
     def _serial_loop(self) -> None:
         import serial
@@ -112,8 +118,11 @@ class SerialReader:
                 self._reconnect_event.clear()
 
             except Exception as exc:
-                print(f"[SerialReader] Unexpected error: {exc}")
-                time.sleep(0.1)
+                print(f"[SerialReader] Connection lost: {exc}")
+                self._close_connection()
+                self.status_message = f"Connection lost - retrying in {RECONNECT_DELAY:.0f}s..."
+                self._reconnect_event.wait(timeout=RECONNECT_DELAY)
+                self._reconnect_event.clear()
 
     def _demo_loop(self) -> None:
         scenarios = [

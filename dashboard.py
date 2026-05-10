@@ -21,15 +21,15 @@ from data_processor import DataProcessor
 
 class Dashboard:
 
-    _WINDOW_W: int      = 1380
-    _WINDOW_H: int      = 820
-    _LEFT_PANEL_W: int  = 250
+    _WINDOW_W: int      = 1340
+    _WINDOW_H: int      = 740
+    _LEFT_PANEL_W: int  = 200
     _COLOR_WAITING: str = "#546e7a"
     _COLOR_NO_DEV: str  = "#e67e22"
 
-    _SYSTEM_IMG_SIZE: tuple = (160, 160)
-    _SENSOR_IMG_SIZE: tuple = (72, 72)
-    _MOTOR_IMG_SIZE:  tuple = (90, 90)
+    _SYSTEM_IMG_SIZE: tuple = (110, 110)
+    _SENSOR_IMG_SIZE: tuple = (52, 52)
+    _MOTOR_IMG_SIZE:  tuple = (68, 68)
 
     def __init__(
         self,
@@ -57,8 +57,12 @@ class Dashboard:
     def _setup_window(self) -> None:
         self.root.title("Motor Digital Twin Monitor")
         self.root.configure(bg=COLOR_BG)
-        self.root.geometry(f"{self._WINDOW_W}x{self._WINDOW_H}")
-        self.root.minsize(960, 640)
+        sw = self.root.winfo_screenwidth()
+        sh = self.root.winfo_screenheight()
+        w  = min(self._WINDOW_W, sw)
+        h  = min(self._WINDOW_H, sh - 40)
+        self.root.geometry(f"{w}x{h}+0+0")
+        self.root.minsize(900, 600)
         self.root.state("zoomed")
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
@@ -98,25 +102,25 @@ class Dashboard:
         self.img_motor_off = self._load_img("motor_off.png", mo, COLOR_GREY)
 
     def _build_layout(self) -> None:
-        title_bar = tk.Frame(self.root, bg=COLOR_ACCENT, pady=7)
+        title_bar = tk.Frame(self.root, bg=COLOR_ACCENT, pady=4)
         title_bar.pack(fill=tk.X, side=tk.TOP)
         tk.Label(
             title_bar,
             text="  ⚙  Motor Digital Twin Monitor",
-            font=("Helvetica", 15, "bold"),
+            font=("Helvetica", 12, "bold"),
             bg=COLOR_ACCENT, fg=COLOR_TEXT,
-        ).pack(side=tk.LEFT, padx=12)
+        ).pack(side=tk.LEFT, padx=10)
 
         self._threshold_label = tk.Label(
             title_bar,
             text=self._threshold_text(),
-            font=("Courier", 8),
+            font=("Courier", 7),
             bg=COLOR_ACCENT, fg="#a0b0c0",
         )
-        self._threshold_label.pack(side=tk.RIGHT, padx=14)
+        self._threshold_label.pack(side=tk.RIGHT, padx=10)
 
         content = tk.Frame(self.root, bg=COLOR_BG)
-        content.pack(fill=tk.BOTH, expand=True, padx=8, pady=(6, 2))
+        content.pack(fill=tk.BOTH, expand=True, padx=6, pady=(4, 2))
 
         self._left = tk.Frame(
             content, bg=COLOR_PANEL,
@@ -144,57 +148,57 @@ class Dashboard:
         p = self._left
 
         self._sys_img_lbl = tk.Label(p, image=self.img_sys_normal, bg=COLOR_PANEL)
-        self._sys_img_lbl.pack(pady=(12, 4))
+        self._sys_img_lbl.pack(pady=(6, 2))
 
         self._overall_badge = tk.Label(
             p, text="●  WAITING",
-            font=("Helvetica", 12, "bold"),
+            font=("Helvetica", 10, "bold"),
             bg=self._COLOR_WAITING, fg="white",
-            width=14, pady=5,
+            width=14, pady=4,
             relief=tk.RAISED, bd=2,
         )
-        self._overall_badge.pack(pady=(4, 2), padx=14)
+        self._overall_badge.pack(pady=(3, 1), padx=10)
 
         self._fault_type_lbl = tk.Label(
             p, text="Awaiting sensor data…",
-            font=("Helvetica", 8), wraplength=220,
+            font=("Helvetica", 7), wraplength=185,
             bg=COLOR_PANEL, fg=COLOR_WARN,
         )
-        self._fault_type_lbl.pack(pady=(0, 4), padx=6)
+        self._fault_type_lbl.pack(pady=(0, 3), padx=4)
 
         self._reconnect_btn = tk.Button(
             p,
             text="⟳  Reconnect Serial",
-            font=("Helvetica", 8, "bold"),
+            font=("Helvetica", 7, "bold"),
             bg=COLOR_ACCENT, fg="white",
             activebackground="#1a5276",
             activeforeground="white",
             relief=tk.FLAT, cursor="hand2",
             command=self._on_reconnect,
-            pady=5, padx=8,
+            pady=4, padx=6,
         )
-        self._reconnect_btn.pack(pady=(2, 8), padx=14, fill=tk.X)
+        self._reconnect_btn.pack(pady=(2, 5), padx=10, fill=tk.X)
         if self.reader.demo_mode:
             self._reconnect_btn.config(state=tk.DISABLED, text="Demo Mode — No Serial")
 
-        tk.Frame(p, bg=COLOR_ACCENT, height=2).pack(fill=tk.X, padx=10, pady=4)
+        tk.Frame(p, bg=COLOR_ACCENT, height=1).pack(fill=tk.X, padx=8, pady=3)
         tk.Label(
             p, text="Sensor Status",
-            font=("Helvetica", 9, "bold"),
+            font=("Helvetica", 8, "bold"),
             bg=COLOR_PANEL, fg=COLOR_TEXT,
-        ).pack(pady=(0, 2))
+        ).pack(pady=(0, 1))
 
         self._card_temp    = self._make_sensor_card(p, "Temperature", self.img_temp_normal)
         self._card_hum     = self._make_sensor_card(p, "Humidity",    self.img_hum_normal)
         self._card_current = self._make_sensor_card(p, "Current",     self.img_current_normal)
         self._card_voltage = self._make_sensor_card(p, "Voltage",     self.img_volt_normal)
 
-        tk.Frame(p, bg=COLOR_ACCENT, height=2).pack(fill=tk.X, padx=10, pady=6)
+        tk.Frame(p, bg=COLOR_ACCENT, height=1).pack(fill=tk.X, padx=8, pady=3)
         tk.Label(
             p, text="Actuator Status",
-            font=("Helvetica", 9, "bold"),
+            font=("Helvetica", 8, "bold"),
             bg=COLOR_PANEL, fg=COLOR_TEXT,
-        ).pack(pady=(0, 2))
+        ).pack(pady=(0, 1))
 
         self._card_motor = self._make_actuator_card(p, "Motor / Relay")
 
@@ -204,40 +208,40 @@ class Dashboard:
         label: str,
         image: ImageTk.PhotoImage,
     ) -> dict:
-        card = tk.Frame(parent, bg=COLOR_PANEL, pady=3)
-        card.pack(fill=tk.X, padx=10)
+        card = tk.Frame(parent, bg=COLOR_PANEL, pady=2)
+        card.pack(fill=tk.X, padx=8)
         img_lbl = tk.Label(card, image=image, bg=COLOR_PANEL)
-        img_lbl.pack(side=tk.LEFT, padx=(2, 6))
+        img_lbl.pack(side=tk.LEFT, padx=(2, 4))
         info = tk.Frame(card, bg=COLOR_PANEL)
         info.pack(side=tk.LEFT, fill=tk.X)
         tk.Label(
             info, text=label,
-            font=("Helvetica", 9, "bold"),
+            font=("Helvetica", 8, "bold"),
             bg=COLOR_PANEL, fg=COLOR_TEXT,
         ).pack(anchor=tk.W)
         val_lbl = tk.Label(
             info, text="—",
-            font=("Courier", 9),
+            font=("Courier", 8),
             bg=COLOR_PANEL, fg=COLOR_NORMAL,
         )
         val_lbl.pack(anchor=tk.W)
         return {"img_lbl": img_lbl, "value_lbl": val_lbl}
 
     def _make_actuator_card(self, parent: tk.Frame, label: str) -> dict:
-        card = tk.Frame(parent, bg=COLOR_PANEL, pady=3)
-        card.pack(fill=tk.X, padx=10)
+        card = tk.Frame(parent, bg=COLOR_PANEL, pady=2)
+        card.pack(fill=tk.X, padx=8)
         img_lbl = tk.Label(card, image=self.img_motor_off, bg=COLOR_PANEL)
-        img_lbl.pack(side=tk.LEFT, padx=(2, 6))
+        img_lbl.pack(side=tk.LEFT, padx=(2, 4))
         info = tk.Frame(card, bg=COLOR_PANEL)
         info.pack(side=tk.LEFT, fill=tk.X)
         tk.Label(
             info, text=label,
-            font=("Helvetica", 9, "bold"),
+            font=("Helvetica", 8, "bold"),
             bg=COLOR_PANEL, fg=COLOR_TEXT,
         ).pack(anchor=tk.W)
         state_lbl = tk.Label(
             info, text="Reported: —",
-            font=("Courier", 9),
+            font=("Courier", 8),
             bg=COLOR_PANEL, fg=COLOR_GREY,
         )
         state_lbl.pack(anchor=tk.W)
@@ -246,15 +250,15 @@ class Dashboard:
     def _setup_graphs(self) -> None:
         self._fig, axes = plt.subplots(
             4, 1,
-            figsize=(9, 6.5),
+            figsize=(7.5, 5.6),
             facecolor=COLOR_BG,
         )
         self._ax_t, self._ax_h, self._ax_c, self._ax_v = axes
 
         self._fig.subplots_adjust(
-            hspace=0.65,
-            left=0.09, right=0.97,
-            top=0.96, bottom=0.06,
+            hspace=0.72,
+            left=0.10, right=0.97,
+            top=0.97, bottom=0.05,
         )
 
         for ax in axes:
@@ -343,7 +347,7 @@ class Dashboard:
                 f"Temp >{TEMP_HIGH_LIMIT}°C  "
                 f"Hum <{HUMIDITY_LOW_LIMIT}%  "
                 f"I=0→alert  "
-                f"V <{VOLTAGE_LOW_LIMIT} / >{VOLTAGE_HIGH_LIMIT}V   Motor: 0=ON 1=OFF"
+                f"V <{VOLTAGE_LOW_LIMIT} / >{VOLTAGE_HIGH_LIMIT}V   Motor: 1=ON 0=OFF"
             )
         )
 
@@ -416,7 +420,7 @@ class Dashboard:
             )
 
         m = result["motor"]
-        motor_is_on = (m == 0)
+        motor_is_on = (m == 1)
         self._card_motor["img_lbl"].config(
             image=self.img_motor_on if motor_is_on else self.img_motor_off
         )
@@ -498,7 +502,7 @@ class Dashboard:
             f"Hum <{HUMIDITY_LOW_LIMIT}%  "
             f"I =0 A → alert  "
             f"V <{VOLTAGE_LOW_LIMIT} / >{VOLTAGE_HIGH_LIMIT}V   "
-            f"Motor: 0=ON, 1=OFF"
+            f"Motor: 1=ON, 0=OFF"
         )
 
     def run(self) -> None:

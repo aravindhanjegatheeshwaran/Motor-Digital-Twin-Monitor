@@ -49,11 +49,20 @@ class DataProcessor:
                     raise ValueError(f"expected key '{key}', got '{k}'")
                 return v.strip()
 
-            t = float(_kv(parts[1], "t"))
-            h = float(_kv(parts[2], "h"))
-            m = int(round(float(_kv(parts[3], "m"))))
-            I = float(_kv(parts[4], "I"))
-            V = float(_kv(parts[5], "V"))
+            def _safe_float(s: str) -> float:
+                s = s.strip()
+                # Fix hardware formatting bug: "0.-3" → "-0.3"
+                import re
+                m = re.match(r'^(\d+)\.-(\d+)$', s)
+                if m:
+                    s = f"-{m.group(1)}.{m.group(2)}"
+                return float(s)
+
+            t = _safe_float(_kv(parts[1], "t"))
+            h = _safe_float(_kv(parts[2], "h"))
+            m = int(round(_safe_float(_kv(parts[3], "m"))))
+            I = _safe_float(_kv(parts[4], "I"))
+            V = _safe_float(_kv(parts[5], "V"))
 
             if m not in (0, 1):
                 return None
@@ -75,7 +84,7 @@ class DataProcessor:
         no_current = current    <= self.current_zero_alert
         low_volt   = voltage     < self.voltage_low_limit
         high_volt  = voltage     > self.voltage_high_limit
-        motor_on   = motor == 0
+        motor_on   = motor == 1
 
         any_fault = high_temp or low_hum or no_current or low_volt or high_volt
 

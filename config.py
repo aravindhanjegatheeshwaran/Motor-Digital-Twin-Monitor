@@ -1,5 +1,5 @@
 ﻿DEMO_MODE: bool         = False
-SERIAL_PORT: str        = "COM3"
+SERIAL_PORT: str        = "COM4"
 BAUD_RATE: int          = 9600
 SERIAL_TIMEOUT: float   = 1.0
 RECONNECT_DELAY: float  = 3.0
