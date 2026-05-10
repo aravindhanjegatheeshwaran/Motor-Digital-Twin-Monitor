@@ -1,0 +1,18 @@
+# Virtual environment
+env/
+venv/
+.venv/
+
+# VS Code workspace file
+*.code-workspace
+
+# Runtime generated files
+live_log.csv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS files
+.DS_Store
+Thumbs.db
